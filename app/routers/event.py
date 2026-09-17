@@ -1,11 +1,11 @@
-from app.schemas.evento import EventoCreate, EventoResponse, EventoUpdate
+from app.schemas.event import EventoCreate, EventoResponse, EventoUpdate
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.evento import Evento
-from app.schemas.evento import EventoCreate, EventoResponse
+from app.models.event import Evento
+from app.schemas.event import EventoCreate, EventoResponse
 from app.services.weather import (
     formatar_resposta_clima,
     obter_coordenadas,
