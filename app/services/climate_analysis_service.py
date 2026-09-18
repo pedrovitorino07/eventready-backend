@@ -1,40 +1,47 @@
-def analisar_clima(clima_data: dict) -> dict:
-    if not clima_data:
-        return None
-
+def analisar_clima(clima: dict) -> dict:
     motivos = []
     recomendacoes = []
+    nivel = "BOM"
 
-    if clima_data['chance_chuva'] >= 70:
+    chance_chuva = clima.get("chance_chuva", 0)
+    indice_uv = clima.get("indice_uv_max", 0)
+    vento = clima.get("vento_max", 0)
+    temp = clima.get("temperatura_max", 25)
+
+    if chance_chuva >= 60:
+        nivel = "ATENCAO"
         motivos.append("Alta probabilidade de chuva")
         recomendacoes.append("Prefira um local coberto")
-    elif clima_data['chance_chuva'] >= 40:
-        motivos.append("Risco moderado de chuva")
-        recomendacoes.append("Tenha um plano B para áreas abertas")
+    elif chance_chuva >= 30:
+        if nivel != "ATENCAO":
+            nivel = "REGULAR"
+        motivos.append("Possibilidade moderada de chuva")
+        recomendacoes.append("Tenha um plano B caso garoe")
 
-    if clima_data['indice_uv_max'] >= 8:
+    if indice_uv >= 8.0:
+        if nivel == "BOM":
+            nivel = "ATENCAO"
         motivos.append("Índice UV muito alto")
-        recomendacoes.append("Providencie áreas de sombra e protetor solar")
+        recomendacoes.append("Utilize protetor solar e busque áreas de sombra")
 
-    if clima_data['temperatura_max'] >= 32:
-        motivos.append("Temperatura muito alta")
-        recomendacoes.append("Garanta hidratação e ventilação adequada")
-    elif clima_data['temperatura_max'] <= 15:
-        motivos.append("Temperatura baixa")
-        recomendacoes.append("Recomende agasalhos ou providencie aquecedores")
-
-    if clima_data['vento_max'] >= 30:
-        motivos.append("Ventos fortes")
-        recomendacoes.append(
-            "Cuidado com estruturas leves montadas ao ar livre")
-
-    qtd_motivos = len(motivos)
-    if qtd_motivos == 0:
-        nivel = "IDEAL"
-    elif qtd_motivos <= 2:
+    if vento > 25.0:
         nivel = "ATENCAO"
-    else:
-        nivel = "ALERTA"
+        motivos.append("Ventos fortes previstos")
+        recomendacoes.append("Evite estruturas leves ao ar livre")
+
+    if temp > 35.0:
+        nivel = "ATENCAO"
+        motivos.append("Temperatura muito elevada")
+        recomendacoes.append("Mantenha os participantes hidratados")
+    elif temp < 12.0:
+        if nivel == "BOM":
+            nivel = "REGULAR"
+        motivos.append("Temperatura baixa")
+        recomendacoes.append("Considere áreas aquecidas ou agasalhos")
+
+    if not motivos:
+        motivos.append("Condições climáticas estáveis e favoráveis")
+        recomendacoes.append("Aproveite o evento ao ar livre")
 
     return {
         "nivel": nivel,

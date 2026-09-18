@@ -1,64 +1,48 @@
-def calcular_event_score(clima_data: dict, horario_evento: str) -> dict:
-    if not clima_data:
-        return None
+def calcular_event_score(clima_data: dict, horario: str) -> dict:
+    chance_chuva = clima_data.get("chance_chuva", 0)
+    temp_max = clima_data.get("temperatura_max", 25.0)
 
-    score_fatores = {"clima": 0, "chuva": 0,
-                     "temperatura": 0, "horario": 0, "uv": 0}
+    pts_chuva = max(0, int(25 - (chance_chuva * 0.25)))
 
-    condicao = clima_data['condicao'].lower()
-    if any(c in condicao for c in ['sol', 'limpo']):
-        score_fatores['clima'] = 30
-    elif any(c in condicao for c in ['nublado', 'parcialmente']):
-        score_fatores['clima'] = 20
-    elif any(c in condicao for c in ['garoa', 'chuva leve']):
-        score_fatores['clima'] = 10
+    if 20 <= temp_max <= 28:
+        pts_temp = 25
+    elif 18 <= temp_max < 20 or 28 < temp_max <= 33:
+        pts_temp = 18
     else:
-        score_fatores['clima'] = 0
+        pts_temp = 10
 
-    chance_chuva = clima_data['chance_chuva']
-    if chance_chuva <= 20:
-        score_fatores['chuva'] = 25
-    elif chance_chuva <= 50:
-        score_fatores['chuva'] = 15
-    elif chance_chuva <= 80:
-        score_fatores['chuva'] = 5
+    condicao = clima_data.get("condicao", "").lower()
+    if "claro" in condicao or "sol" in condicao:
+        pts_clima = 25
+    elif "nublado" in condicao:
+        pts_clima = 20
+    else:
+        pts_clima = 12
 
-    temp = clima_data['temperatura_max']
-    if 20 <= temp <= 28:
-        score_fatores['temperatura'] = 20
-    elif 15 <= temp < 20 or 28 < temp <= 32:
-        score_fatores['temperatura'] = 10
-    elif temp > 32 or temp < 15:
-        score_fatores['temperatura'] = 5
+    hora = int(horario.split(":")[0]) if ":" in horario else 12
+    if 10 <= hora <= 17:
+        pts_horario = 22
+    else:
+        pts_horario = 25
 
-    try:
-        hora = int(horario_evento.split(":")[0])
-        if 8 <= hora <= 17:
-            score_fatores['horario'] = 15
-        else:
-            score_fatores['horario'] = 10
-    except:
-        score_fatores['horario'] = 10
+    score_total = pts_chuva + pts_temp + pts_clima + pts_horario
 
-    uv = clima_data['indice_uv_max']
-    if uv <= 4:
-        score_fatores['uv'] = 10
-    elif uv <= 7:
-        score_fatores['uv'] = 5
-
-    total_score = sum(score_fatores.values())
-
-    if total_score >= 80:
+    if score_total >= 85:
         nivel = "EXCELENTE"
-    elif total_score >= 60:
+    elif score_total >= 70:
         nivel = "BOM"
-    elif total_score >= 40:
+    elif score_total >= 50:
         nivel = "REGULAR"
     else:
         nivel = "RUIM"
 
     return {
-        "score": total_score,
+        "score": score_total,
         "nivel": nivel,
-        "fatores": score_fatores
+        "fatores": {
+            "clima": pts_clima,
+            "chuva": pts_chuva,
+            "temperatura": pts_temp,
+            "horario": pts_horario
+        }
     }

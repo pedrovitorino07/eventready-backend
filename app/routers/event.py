@@ -1,18 +1,64 @@
-from app.schemas.event import EventoCreate, EventoResponse, EventoUpdate
+import re
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.event import Evento
-from app.schemas.event import EventoCreate, EventoResponse
+from app.schemas.event import (
+    EventoCreate,
+    EventoResponse,
+    EventoUpdate,
+    EventoResponseCompleto
+)
 from app.services.weather import (
     formatar_resposta_clima,
     obter_coordenadas,
     obter_previsao_clima,
 )
+from app.services.climate_analysis_service import analisar_clima
+from app.services.event_score_service import calcular_event_score
+from app.services.favorite_service import is_favorited
 
 router = APIRouter(prefix="/eventos", tags=["Eventos"])
+
+
+class MockUser(BaseModel):
+    id: int
+
+
+def get_current_user():
+    return MockUser(id=1)
+
+
+def converter_clima_para_numerico(clima_dict: dict) -> dict:
+    """Converte os valores de clima com strings/unidades para tipos numéricos puros."""
+    def parse_float(val):
+        if isinstance(val, (int, float)):
+            return float(val)
+        if isinstance(val, str):
+            nums = re.findall(r"[-+]?\d*\.\d+|\d+", val.replace(',', '.'))
+            return float(nums[0]) if nums else 0.0
+        return 0.0
+
+    def parse_int(val):
+        if isinstance(val, (int, float)):
+            return int(val)
+        if isinstance(val, str):
+            nums = re.findall(r"\d+", val)
+            return int(nums[0]) if nums else 0
+        return 0
+
+    return {
+        "condicao": clima_dict.get("condicao", "Desconhecida"),
+        "temperatura_max": parse_float(clima_dict.get("temperatura_max", 0)),
+        "sensacao_max": parse_float(clima_dict.get("sensacao_max", 0)),
+        "chance_chuva": parse_int(clima_dict.get("chance_chuva", 0)),
+        "vento_max": parse_float(clima_dict.get("vento_max", 0)),
+        "indice_uv_max": parse_float(clima_dict.get("indice_uv_max", 0)),
+        "sol": clima_dict.get("sol", {"nascer": "00:00", "por": "00:00"})
+    }
 
 
 @router.post(
@@ -39,8 +85,12 @@ def listar_eventos(db: Session = Depends(get_db)):
     return db.query(Evento).all()
 
 
-@router.get("/{evento_id}/clima")
-def ver_clima_do_evento(evento_id: int, db: Session = Depends(get_db)):
+@router.get("/{evento_id}/clima", response_model=EventoResponseCompleto)
+def buscar_evento_por_id(
+    evento_id: int,
+    db: Session = Depends(get_db),
+    current_user: MockUser = Depends(get_current_user)
+):
     evento = db.query(Evento).filter(Evento.id == evento_id).first()
     if not evento:
         raise HTTPException(status_code=404, detail="Evento não encontrado.")
@@ -62,10 +112,37 @@ def ver_clima_do_evento(evento_id: int, db: Session = Depends(get_db)):
             detail=f"Não foi possível obter dados do clima: {erro}",
         )
 
-    return formatar_resposta_clima(evento.nome, clima_raw)
+    clima_data = formatar_resposta_clima(evento.nome, clima_raw)
+    if isinstance(clima_data, dict) and "recomendacao" in clima_data:
+        clima_data.pop("recomendacao")
+
+    analise_climatica = analisar_clima(clima_data)
+
+    horario_formatado = evento.horario.strftime("%H:%M") if hasattr(
+        evento.horario, 'strftime') else str(evento.horario)[:5]
+
+    event_score_data = calcular_event_score(clima_data, horario_formatado)
+
+    favoritado = is_favorited(db, current_user.id, evento_id)
+
+    return {
+        "evento": {
+            "id": evento.id,
+            "nome": evento.nome,
+            "data": evento.data,
+            "horario": horario_formatado,
+            "local": evento.local,
+            "latitude": evento.latitude,
+            "longitude": evento.longitude
+        },
+        "clima": clima_data,
+        "analise_climatica": analise_climatica,
+        "event_score": event_score_data,
+        "favoritado": favoritado
+    }
 
 
-@router.delete("/{evento_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{evento_id}", status_code=status.HTTP_200_OK)
 def deletar_evento(evento_id: int, db: Session = Depends(get_db)):
     evento = db.query(Evento).filter(Evento.id == evento_id).first()
 
@@ -78,7 +155,7 @@ def deletar_evento(evento_id: int, db: Session = Depends(get_db)):
     db.delete(evento)
     db.commit()
 
-    return None
+    return {"message": "Evento deletado com sucesso."}
 
 
 @router.put("/{evento_id}", response_model=EventoResponse)

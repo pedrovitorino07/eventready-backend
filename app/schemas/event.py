@@ -1,6 +1,48 @@
-from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
 from datetime import date, time
+from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
+
+
+class EventoBase(BaseModel):
+    nome: str
+    data: date
+    horario: time
+    local: str
+    descricao: Optional[str] = None
+
+
+class EventoCreate(EventoBase):
+    pass
+
+
+class EventoUpdate(BaseModel):
+    nome: Optional[str] = None
+    data: Optional[date] = None
+    horario: Optional[time] = None
+    local: Optional[str] = None
+    descricao: Optional[str] = None
+
+
+class EventoResponse(EventoBase):
+    id: int
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+    class Config:
+        from_attributes = True
+
+
+class EventoResponseDetalhado(BaseModel):
+    id: int
+    nome: str
+    data: date
+    horario: str
+    local: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+    class Config:
+        from_attributes = True
 
 
 class SolSchema(BaseModel):
@@ -8,7 +50,7 @@ class SolSchema(BaseModel):
     por: str
 
 
-class ClimaSchema(BaseModel):
+class ClimaNumericoSchema(BaseModel):
     condicao: str
     temperatura_max: float
     sensacao_max: float
@@ -24,69 +66,15 @@ class AnaliseClimaticaSchema(BaseModel):
     recomendacoes: List[str]
 
 
-class EventScoreFatoresSchema(BaseModel):
-    clima: int
-    chuva: int
-    temperatura: int
-    horario: int
-    uv: int
-
-
 class EventScoreSchema(BaseModel):
     score: int
     nivel: str
-    fatores: EventScoreFatoresSchema
-
-
-class EventoDetalheSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    nome: str
-    data: date
-    horario: time
-    local: str
+    fatores: Dict[str, Any]
 
 
 class EventoResponseCompleto(BaseModel):
-    evento: EventoDetalheSchema
-    clima: Optional[ClimaSchema] = None
-    analise_climatica: Optional[AnaliseClimaticaSchema] = None
-    event_score: Optional[EventScoreSchema] = None
-    favoritado: bool = False
-
-
-class FavoriteResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    user_id: int
-    event_id: int
-
-
-class EventoBase(BaseModel):
-    nome: str
-    data: date
-    horario: time
-    local: str
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    descricao: Optional[str] = None
-
-
-class EventoCreate(EventoBase):
-    pass
-
-
-class EventoUpdate(EventoBase):
-    nome: Optional[str] = None
-    data: Optional[date] = None
-    horario: Optional[time] = None
-    local: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    descricao: Optional[str] = None
-
-
-class EventoResponse(EventoBase):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
+    evento: EventoResponseDetalhado
+    clima: ClimaNumericoSchema
+    analise_climatica: AnaliseClimaticaSchema
+    event_score: EventScoreSchema
+    favoritado: bool

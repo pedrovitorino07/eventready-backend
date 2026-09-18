@@ -40,7 +40,7 @@ def favoritar_evento(
         raise HTTPException(status_code=400, detail="Erro ao favoritar evento")
 
 
-@router.delete("/{event_id}/favoritar", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{event_id}/favoritar", status_code=status.HTTP_200_OK)
 def desfavoritar_evento(
     event_id: int,
     db: Session = Depends(get_db),
@@ -57,7 +57,8 @@ def desfavoritar_evento(
 
     db.delete(fav)
     db.commit()
-    return None
+
+    return {"message": "Evento removido dos favoritos com sucesso."}
 
 
 @router.get("/favoritos")

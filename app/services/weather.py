@@ -111,11 +111,12 @@ def formatar_resposta_clima(evento_nome: str, dados_raw: dict) -> dict:
 
     code = daily.get("weather_code", [0])[
         0] if daily.get("weather_code") else 0
-    temp_max = daily.get("temperature_2m_max", [0.0])[0]
-    sensacao_max = daily.get("apparent_temperature_max", [0.0])[0]
-    chance_chuva = daily.get("precipitation_probability_max", [0])[0]
-    vento_max = daily.get("wind_speed_10m_max", [0.0])[0]
-    uv_max = daily.get("uv_index_max", [0.0])[0]
+
+    temp_max = float(daily.get("temperature_2m_max", [0.0])[0])
+    sensacao_max = float(daily.get("apparent_temperature_max", [0.0])[0])
+    chance_chuva = int(daily.get("precipitation_probability_max", [0])[0] or 0)
+    vento_max = float(daily.get("wind_speed_10m_max", [0.0])[0])
+    uv_max = float(daily.get("uv_index_max", [0.0])[0])
 
     nascer_raw = daily.get("sunrise", [""])[0]
     por_raw = daily.get("sunset", [""])[0]
@@ -131,17 +132,15 @@ def formatar_resposta_clima(evento_nome: str, dados_raw: dict) -> dict:
         temp_max=temp_max,
     )
 
+    # Retorna os campos diretamente na raiz do dicionário de clima,
+    # eliminando a duplicação da chave "clima" interna que causava o erro de validação.
     return {
-        "evento": evento_nome,
-        "data": daily.get("time", [""])[0],
-        "clima": {
-            "condicao": WMO_CODES.get(code, "Condição desconhecida"),
-            "temperatura_max": f"{temp_max}°C",
-            "sensacao_max": f"{sensacao_max}°C",
-            "chance_chuva": f"{chance_chuva}%",
-            "vento_max": f"{vento_max} km/h",
-            "indice_uv_max": uv_max,
-            "sol": {"nascer": nascer_hora, "por": por_hora},
-            "recomendacao": recomendacao,
-        },
+        "condicao": WMO_CODES.get(code, "Condição desconhecida"),
+        "temperatura_max": temp_max,
+        "sensacao_max": sensacao_max,
+        "chance_chuva": chance_chuva,
+        "vento_max": vento_max,
+        "indice_uv_max": uv_max,
+        "sol": {"nascer": nascer_hora, "por": por_hora},
+        "recomendacao": recomendacao,
     }
