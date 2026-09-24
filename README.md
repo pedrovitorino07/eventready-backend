@@ -1,8 +1,8 @@
-# EventReady - Backend 🚀
+# EventReady - Backend 
 
 API para gerenciamento e organização de eventos, com foco em ajudar organizadores a decidir se as condições climáticas previstas são favoráveis para o dia do evento. Construída com **FastAPI** e **PostgreSQL**, totalmente conteinerizada com **Docker**.
 
-## ✨ Funcionalidades
+##  Funcionalidades
 
 - **CRUD de eventos** — criação, listagem, atualização e remoção de eventos.
 - **Geocodificação automática** — ao criar/atualizar um evento, se latitude e longitude não forem informadas, elas são obtidas automaticamente a partir do nome do local (via [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api)).
@@ -11,7 +11,7 @@ API para gerenciamento e organização de eventos, com foco em ajudar organizado
 - **Event Score** — nota de 0 a 100 calculada a partir da chance de chuva, temperatura, condição do céu e horário do evento, classificando o evento como `EXCELENTE`, `BOM`, `REGULAR` ou `RUIM`.
 - **Favoritos** — usuários podem favoritar/desfavoritar eventos e listar seus favoritos.
 
-## 🛠 Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 - **[FastAPI](https://fastapi.tiangolo.com/)** — Framework web moderno e de alta performance para construção de APIs em Python.
 - **[PostgreSQL](https://www.postgresql.org/)** — Banco de dados relacional.
@@ -22,7 +22,7 @@ API para gerenciamento e organização de eventos, com foco em ajudar organizado
 - **[Docker](https://www.docker.com/)** & **[Docker Compose](https://docs.docker.com/compose/)** — Isolamento de ambiente e orquestração dos containers.
 - **Uvicorn** — Servidor ASGI para a aplicação FastAPI.
 
-## 📁 Estrutura do Projeto
+##  Estrutura do Projeto
 
 ```
 eventready-backend/
@@ -50,7 +50,7 @@ eventready-backend/
 └── README.md
 ```
 
-## 📋 Pré-requisitos
+##  Pré-requisitos
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
@@ -59,7 +59,7 @@ Para rodar sem Docker, você também vai precisar de:
 - [Python 3.11+](https://www.python.org/downloads/)
 - Uma instância do [PostgreSQL](https://www.postgresql.org/download/) em execução
 
-## 🚀 Como Rodar o Projeto (com Docker)
+##  Como Rodar o Projeto (com Docker)
 
 Esta é a forma mais fácil e recomendada, já que o banco de dados e a API sobem automaticamente configurados.
 
@@ -80,7 +80,7 @@ O `docker-compose.yml` já sobe dois serviços:
 - **db** — PostgreSQL 15, exposto na porta `5432`.
 - **web** — API FastAPI, exposta na porta `8000`, conectada automaticamente ao banco.
 
-## 💻 Como Rodar Localmente (sem Docker)
+##  Como Rodar Localmente (sem Docker)
 
 1. Crie e ative um ambiente virtual:
    ```bash
@@ -101,7 +101,7 @@ O `docker-compose.yml` já sobe dois serviços:
    uvicorn app.main:app --reload
    ```
 
-## ⚙️ Variáveis de Ambiente
+##  Variáveis de Ambiente
 
 | Variável       | Descrição                                   | Padrão (local)                                            |
 | -------------- | -------------------------------------------- | ----------------------------------------------------------- |
@@ -109,9 +109,9 @@ O `docker-compose.yml` já sobe dois serviços:
 
 No `docker-compose.yml`, essa variável já é definida automaticamente para apontar para o container `db`.
 
-> ⚠️ **Nota:** as credenciais do banco no `docker-compose.yml` são apenas para ambiente de desenvolvimento local. Não as utilize em produção — use variáveis de ambiente/secrets adequados.
+>  **Nota:** as credenciais do banco no `docker-compose.yml` são apenas para ambiente de desenvolvimento local. Não as utilize em produção — use variáveis de ambiente/secrets adequados.
 
-## 📡 Endpoints da API
+##  Endpoints da API
 
 ### Eventos
 
@@ -174,7 +174,7 @@ No `docker-compose.yml`, essa variável já é definida automaticamente para apo
 }
 ```
 
-## 🧪 Testes
+##  Testes
 
 O projeto conta com testes unitários para os serviços de análise climática e cálculo de event score, em `app/tests/test_features.py`.
 
