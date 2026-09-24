@@ -188,7 +188,3 @@ No `docker-compose.yml`, essa variável já é definida automaticamente para apo
   "favoritado": false
 }
 ```
-
-## 📄 Licença
-
-Este projeto ainda não possui uma licença definida. Caso pretenda tornar o uso e a distribuição explícitos, considere adicionar um arquivo `LICENSE` (ex: MIT).
