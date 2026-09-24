@@ -22,10 +22,25 @@ API para gerenciamento e organização de eventos, com foco em ajudar organizado
 - **[Docker](https://www.docker.com/)** & **[Docker Compose](https://docs.docker.com/compose/)** — Isolamento de ambiente e orquestração dos containers.
 - **Uvicorn** — Servidor ASGI para a aplicação FastAPI.
 
+##  Arquitetura
+
+O EventReady segue uma arquitetura simples de API REST, onde o back-end centraliza a comunicação entre o front-end, o banco de dados e os serviços externos de geolocalização e clima:
+
+<img width="1251" height="575" alt="Captura de tela 2026-09-24 193742" src="https://github.com/user-attachments/assets/dddf964c-a582-4640-99ba-2d6dd83728a1" />
+
+
+- **Interface (Front-End)** — consome a API via requisições HTTP (não faz parte deste repositório).
+- **API (Back-End)** — este repositório. Recebe as requisições do front-end, aplica as regras de negócio (CRUD de eventos, favoritos, análise climática e event score) e orquestra as chamadas ao banco de dados e às APIs externas.
+- **Banco de dados** — PostgreSQL, onde eventos e favoritos são persistidos.
+- **API Externa (Open-Meteo e GeoCoding)** — fornece as coordenadas geográficas do local do evento e a previsão do tempo utilizada nas análises climáticas.
+
 ##  Estrutura do Projeto
 
 ```
 eventready-backend/
+├── docs/
+│   └── images/
+│       └── arquitetura.png       # Diagrama de arquitetura usado no README
 ├── app/
 │   ├── main.py                       # Ponto de entrada da aplicação FastAPI
 │   ├── database.py                   # Configuração da conexão com o banco (SQLAlchemy)
@@ -174,13 +189,6 @@ No `docker-compose.yml`, essa variável já é definida automaticamente para apo
 }
 ```
 
-##  Testes
+## 📄 Licença
 
-O projeto conta com testes unitários para os serviços de análise climática e cálculo de event score, em `app/tests/test_features.py`.
-
-Para rodar (é necessário ter o `pytest` instalado):
-
-```bash
-pip install pytest
-pytest
-```
+Este projeto ainda não possui uma licença definida. Caso pretenda tornar o uso e a distribuição explícitos, considere adicionar um arquivo `LICENSE` (ex: MIT).
