@@ -1,13 +1,22 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import Base, engine
-from app.models.event import Evento
-from app.models.favorite import Favorite
 from app.routers import event, favorites
 
-Base.metadata.create_all(bind=engine)
+app = FastAPI()
 
-app = FastAPI(title="EventReady API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(event.router)
 app.include_router(favorites.router)
+
+
+@app.get("/")
+def read_root():
+    return {"message": "CORS habilitado com sucesso!"}

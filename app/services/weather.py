@@ -132,8 +132,6 @@ def formatar_resposta_clima(evento_nome: str, dados_raw: dict) -> dict:
         temp_max=temp_max,
     )
 
-    # Retorna os campos diretamente na raiz do dicionário de clima,
-    # eliminando a duplicação da chave "clima" interna que causava o erro de validação.
     return {
         "condicao": WMO_CODES.get(code, "Condição desconhecida"),
         "temperatura_max": temp_max,

@@ -33,7 +33,6 @@ def get_current_user():
 
 
 def converter_clima_para_numerico(clima_dict: dict) -> dict:
-    """Converte os valores de clima com strings/unidades para tipos numéricos puros."""
     def parse_float(val):
         if isinstance(val, (int, float)):
             return float(val)
