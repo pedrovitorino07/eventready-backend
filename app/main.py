@@ -15,8 +15,3 @@ app.add_middleware(
 
 app.include_router(event.router)
 app.include_router(favorites.router)
-
-
-@app.get("/")
-def read_root():
-    return {"message": "CORS habilitado com sucesso!"}
